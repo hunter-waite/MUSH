@@ -12,4 +12,4 @@ parseline.o: parseline.c parseline.h
 	$(CC) $(CLFAGS) -c -o parseline.o parseline.c
 
 clean:
-	rm parseline.o
+	rm -f *.o
