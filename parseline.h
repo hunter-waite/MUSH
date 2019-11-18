@@ -11,7 +11,9 @@
 typedef struct stage {
     int snum;
     char input[LINESIZE]; /*make sure to store this with no newline*/
-    int pipeto;  /*could be 0, if so find output*/
+    int pipeto;  /*could be NULL, if so find output*/
+    char ins[NUMARGS];
+    char outs[NUMARGS];
     int argcount;
     char argv[NUMARGS][LINESIZE];
     /*need some way to tell between inputs and outputs*/
