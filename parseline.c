@@ -2,8 +2,8 @@
 
 int main(int argc, char *argv[]){
     char line[LINESIZE];
+    stage stages[NUMCMD];
     get_line(line,LINESIZE);
-    printf(line);
     return 0;
 }
 
