@@ -30,7 +30,8 @@ void get_stages(char *line, stage *stages){
         if(token[0] == ' ')
             token++;
         printf("Token: %s\n",token);
-        populate_stage(stages[count], token, 100);
+        stages[count].snum = count;
+        strcpy(stages[count].input, token);
         /*function to parse through each token*/
         token = strtok(NULL,"|");
         count ++;
@@ -72,7 +73,3 @@ void print_stage(const struct stage s){
  
 }
 
-void populate_stage(stage st, char *token, int stnum){
-    st.snum = stnum;
-    strcpy(st.input, token);
-}
