@@ -65,3 +65,14 @@ void print_stage(const struct stage s){
     printf("\n\n");
  
 }
+
+struct stage populate_stage(char *token, int stnum){
+    struct stage st;
+
+    st = calloc(1, sizeof(stage));
+    st.snum = stnum;
+    strcpy(st.input, token);
+
+
+
+}
