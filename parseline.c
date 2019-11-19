@@ -19,12 +19,13 @@ void get_stages(char *line, stage *stages){
     int count = 0;
     while(token != NULL){
         if(count >= NUMCMD){
-            fprintf(stderr,"pipeline too deep");
+            fprintf(stderr,"pipeline too deep\n");
             exit(EXIT_FAILURE);
         }
         if(token[0] == ' ')
             token++;
         printf("Token: %s\n",token);
+        /*function to parse through each token*/
         token = strtok(NULL,"|");
         count ++;
     }
