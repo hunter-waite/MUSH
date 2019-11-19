@@ -1,11 +1,14 @@
 #include "parseline.h"
 
 int main(int argc, char *argv[]){
+    int count, i;
     char line[LINESIZE];
     stage stages[NUMCMD];
     get_line(line,LINESIZE);
-    get_stages(line,stages);
-    printf("stop");
+    count = get_stages(line,stages);
+    for(i=0; i < count; i++){
+        parse_stages(stages + i);
+    }
     return 0;
 }
 
@@ -15,7 +18,7 @@ int main(int argc, char *argv[]){
  * 0 and print the stages. I'm super open to doing other ways.*/
 
 
-void get_stages(char *line, stage *stages){
+int get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
     int count = 0;
     if(!token){ /* null line case */
@@ -30,10 +33,10 @@ void get_stages(char *line, stage *stages){
         printf("Token: '%s'\n",token);
         stages[count].snum = count;
         strcpy(stages[count].input, token);
-        /*function to parse through each token*/
         token = strtok(NULL,"|");
         count ++;
     }
+    return count;
 }
 
 /* gets the line from the prompt in the parseline 
@@ -48,10 +51,15 @@ void get_line(char *line,int size){
     if(strchr(line, '\n') == NULL){ /* if the line is too long */
         fprintf(stderr,"command too long\n");
         exit(3);
-    } else if(line[size-1] == '\n')    /* checks for full line case */
+    }
+    else if(line[size-1] == '\n')    /* checks for full line case */
         line[size-1] = '\0';
     else if(line[strlen(line)-1])   /* last character to null if newline */
         line[strlen(line)-1] = '\0';
+    if(line[strlen(line)-1] == '|'){
+        fprintf(stderr, "invalid null command\n");
+        exit(8); 
+    }
 }
 
 void print_stage(const struct stage s){
@@ -74,8 +82,16 @@ void print_stage(const struct stage s){
 int check_whitespace(char *s){
     int i;
     for(i = 0; i < (int)strlen(s); i++){
-        if(isspace(s[i]))
+        if(!isspace(s[i]))
             return 1;
     }
     return 0;
+}
+
+void parse_stages(stage *s){
+    if(!check_whitespace(s->input)){
+        fprintf(stderr, "invalid null command\n");
+        exit(4);
+    }
+
 }
