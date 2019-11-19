@@ -4,15 +4,34 @@ int main(int argc, char *argv[]){
     char line[LINESIZE];
     stage stages[NUMCMD];
     get_line(line,LINESIZE);
+    get_stages(line,stages);
     return 0;
 }
 
+void get_stages(char *line, stage *stages){
+    char *token = strtok(line,"|");
+    int count = 0;
+    while(token != NULL && count < NUMCMD){
+        if(token[0] == ' ')
+            token++;
+        printf("Token: %s\n",token);
+        token = strtok(NULL,"|");
+    }
+}
+
+/* gets the line from the prompt in the parseline 
+ * max LINESIZE characters
+ * if the last character is a newline changes it to a null */
 void get_line(char *line,int size){
-    printf("line: ");
+    printf("line: "); /* the prompt */
     if(!fgets(line,size,stdin)){
         perror("getline");
         exit(EXIT_FAILURE);
     }
+    if(line[size-1] == '\n')    /* checks for full line case */
+        line[size-1] = '\0';
+    else if(line[strlen(line)-1])   /* last character to null if newline */
+        line[strlen(line)-1] = '\0';
 }
 
 void print_stage(const struct stage s){
