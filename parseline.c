@@ -1,9 +1,9 @@
 #include "parseline.h"
 
 int main(int argc, char *argv[]){
-    char line[LINESIZE] = {'t','r','y',' ', '|'};
+    char line[LINESIZE];
     stage stages[NUMCMD];
-    /*get_line(line,LINESIZE);*/
+    get_line(line,LINESIZE);
     get_stages(line,stages);
     printf("stop");
     return 0;
@@ -27,9 +27,7 @@ void get_stages(char *line, stage *stages){
             fprintf(stderr,"pipeline too deep\n");
             exit(EXIT_FAILURE);
         }
-        if(token[0] == ' ')
-            token++;
-        printf("Token: %s\n",token);
+        printf("Token: '%s'\n",token);
         stages[count].snum = count;
         strcpy(stages[count].input, token);
         /*function to parse through each token*/
@@ -73,3 +71,11 @@ void print_stage(const struct stage s){
  
 }
 
+int check_whitespace(char *s){
+    int i;
+    for(i = 0; i < (int)strlen(s); i++){
+        if(isspace(s[i]))
+            return 1;
+    }
+    return 0;
+}

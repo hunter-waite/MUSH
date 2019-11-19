@@ -23,3 +23,4 @@ void get_stages(char *line, stage *stages);
 void get_line(char *line,int size);
 void print_stage(const struct stage);
 void populate_stage(stage st, char *token, int stnum);
+int check_whitespace(char *s);
