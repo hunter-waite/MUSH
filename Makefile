@@ -1,4 +1,4 @@
-CFLAGS = -g -ansi -Wall -pedantic
+CFLAGS = -g -ansi -Wall -Wextra -pedantic
 CC = gcc
 LD = gcc
 
@@ -9,7 +9,7 @@ parseline: parseline.o
 	$(LD) -o parseline parseline.o
 
 parseline.o: parseline.c parseline.h
-	$(CC) $(CLFAGS) -c -o parseline.o parseline.c
+	$(CC) $(CFLAGS) -c -o parseline.o parseline.c
 
 clean:
 	rm -f *.o
