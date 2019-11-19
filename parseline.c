@@ -17,6 +17,10 @@ int main(int argc, char *argv[]){
 void get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
     int count = 0;
+    if(!token){ /* null line case */
+        fprintf(stderr,"invalid null command\n");
+        exit(3);
+    }
     while(token != NULL){
         if(count >= NUMCMD){
             fprintf(stderr,"pipeline too deep\n");
