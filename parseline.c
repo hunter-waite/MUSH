@@ -8,6 +8,12 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
+/*the way I'm thinking we do this is to have the acutal parse function return
+ * an int that we can pass to a function that either prints a corresponding
+ * error message, just because there are so many. Otherwise we can just return
+ * 0 and print the stages. I'm super open to doing other ways.*/
+
+
 void get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
     int count = 0;
