@@ -17,11 +17,16 @@ int main(int argc, char *argv[]){
 void get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
     int count = 0;
-    while(token != NULL && count < NUMCMD){
+    while(token != NULL){
+        if(count >= NUMCMD){
+            fprintf(stderr,"pipeline too deep");
+            exit(EXIT_FAILURE);
+        }
         if(token[0] == ' ')
             token++;
         printf("Token: %s\n",token);
         token = strtok(NULL,"|");
+        count ++;
     }
 }
 
@@ -34,7 +39,10 @@ void get_line(char *line,int size){
         perror("getline");
         exit(EXIT_FAILURE);
     }
-    if(line[size-1] == '\n')    /* checks for full line case */
+    if(strchr(line, '\n') == NULL){ /* if the line is too long */
+        fprintf(stderr,"command too long\n");
+        exit(3);
+    } else if(line[size-1] == '\n')    /* checks for full line case */
         line[size-1] = '\0';
     else if(line[strlen(line)-1])   /* last character to null if newline */
         line[strlen(line)-1] = '\0';
