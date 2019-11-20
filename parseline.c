@@ -6,12 +6,16 @@
  *  ambiguous input and output */
 
 int main(int argc, char *argv[]){
+    int i;
     int count = 0;
     char line[LINESIZE];
     stage stages[NUMCMD];
     get_line(line,LINESIZE);
     count = get_stages(line,stages);
     parse_stages(stages,count);
+    for(i=0; i < count; i++){
+        print_stage(stages[i], count);
+    }
     return 0;
 }
 
@@ -51,20 +55,51 @@ void get_line(char *line,int size){
         on_error("",3);
 }
 
-void print_stage(const struct stage s){
+void print_stage(const struct stage s, int max){
     int i;
-    
+    char inmsg[LINESIZE] = {'\0'};
+    char outmsg[LINESIZE] = {'\0'};
+
     printf("--------\n");
     printf("Stage %d: \"%s\"\n", s.snum, s.input);
     printf("--------\n");
+
     printf("%12s", "input: \0"); /*have to add actual input*/
+    if(s.in[0]){
+        strcpy(inmsg, s.in);
+        printf("%s\n", inmsg);
+    }
+    else if(s.snum != 0){
+        strcpy(inmsg, "pipe from stage\0");
+        printf("%s ", inmsg);
+        printf("%d\n", s.snum - 1);
+    }
+    else{
+        strcpy(inmsg, "original stdin\0");
+        printf("%s\n", inmsg);
+    }
     printf("%12s", "output: \0"); /*add actual output*/
+    if(s.out[0]){
+        strcpy(outmsg, s.out);
+        printf("%s\n", outmsg);
+    }
+    else if(s.snum != max-1){
+        strcpy(outmsg, "pipe to stage\0");
+        printf("%s ", outmsg);
+        printf("%d\n", s.snum + 1);
+    }
+    else{
+        strcpy(outmsg, "original stdout\0");
+        printf("%s\n", outmsg);
+    }
+
     printf("%12s%d\n", "argc: \0", s.argcount);
     printf("%12s", "argv: \0");
-    for(i = 0; i < s.argcount; i++){
+    for(i = 0; i < s.argcount-1; i++){
         printf("\"%s\", ", s.argv[i]);
     }
-    printf("\n\n");
+    printf("\"%s\"\n", s.argv[s.argcount -1]);
+    printf("\n");
  
 }
 
@@ -123,16 +158,19 @@ void parse_stages(stage *s, int index){
             }
             else if(strcmp(old, ">") && strcmp(old, "<")){
                 if(redirect == 0){
-                    printf("ARG: %s\n", old);
+                    strncpy(s[i].argv[s[i].argcount], old, LINESIZE);
+                    /*printf("ARG: %s\n", s[i].argv[s[i].argcount]);*/
                     s[i].argcount++;
                 }
                 else{
                     redirect = 0;
                 }
+                if(s[i].argcount >= NUMARGS){
+                    on_error(command,2);
+                }
                
             }
         }
-        printf("Argc: %d\n",s[i].argcount);
     }
 }
 
