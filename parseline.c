@@ -115,7 +115,7 @@ int check_whitespace(char *s){
 /* parses the stages to check for errors and to fill their respective
  * stage struct */
 void parse_stages(stage *s, int index){
-    int i, redirect;
+    int i, redirect = 0;
     int incount = 0;
     int outcount = 0;
     char *old, *new, command[LINESIZE], copy[LINESIZE];
@@ -129,6 +129,8 @@ void parse_stages(stage *s, int index){
          *  parses for redirection and such */
         new = strtok(copy," ");
         strcpy(command,new);
+        if(!strcmp(command,"<") || !strcmp(command,">")) /* bad redir up top */
+            on_error("",3);
         while(new != NULL){
             old = new;
             new = strtok(NULL," ");
@@ -209,15 +211,4 @@ void on_error(char *cmd, unsigned int error){
         fprintf(stderr,"undefined error: exiting\n");
     }
     exit(3);
-}
-
-int word_count(char *s){
-    int i, count;
-    count = 0;
-    for(i=0;s[i] != '\0';i++){
-        if(s[i] == ' ' && s[i+1] != ' '){
-            count++;
-        }
-    }
-    return count;
 }
