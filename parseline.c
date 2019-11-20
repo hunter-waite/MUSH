@@ -1,5 +1,10 @@
 #include "parseline.h"
 
+/* in the parse stages we need to figure out the:
+ *  argument count
+ *  argument variables
+ *  ambiguous input and output */
+
 int main(int argc, char *argv[]){
     int count = 0;
     char line[LINESIZE];
@@ -9,12 +14,6 @@ int main(int argc, char *argv[]){
     parse_stages(stages,count);
     return 0;
 }
-
-/*the way I'm thinking we do this is to have the acutal parse function return
- * an int that we can pass to a function that either prints a corresponding
- * error message, just because there are so many. Otherwise we can just return
- * 0 and print the stages. I'm super open to doing other ways.*/
-
 
 int get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
@@ -78,6 +77,8 @@ int check_whitespace(char *s){
     return 0;
 }
 
+/* parses the stages to check for errors and to fill their respective
+ * stage struct */
 void parse_stages(stage *s, int index){
     int i;
     int incount = 0;
@@ -86,7 +87,7 @@ void parse_stages(stage *s, int index){
     for(i=0;i<index; i++){  /* loops through all the stages */
         if(!check_whitespace(s[i].input))   /* if a stage is empty */
             on_error("",3);
-        
+        s[i].argcount = 0;
         /* loops through all the "arguments" in the stage
          *  parses for redirection and such */
         new = strtok(s[i].input," ");
@@ -95,6 +96,7 @@ void parse_stages(stage *s, int index){
             printf("New: %s\n",new); 
             old = new;
             new = strtok(NULL," ");
+
             if(old[0] == '<'){  /* input redirection */
                 if(new){    /* correct redirection */
                     strncpy(s[i].in,new,LINESIZE);
@@ -116,6 +118,7 @@ void parse_stages(stage *s, int index){
                 }
             }
         }
+
         printf("Argc: %d\n",s[i].argcount);
     }
 }
