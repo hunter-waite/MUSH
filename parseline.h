@@ -26,3 +26,4 @@ void populate_stage(stage st, char *token, int stnum);
 int check_whitespace(char *s);
 void parse_stages(stage *s, int index);
 int word_count(char *s);
+void on_error(char *cmd, unsigned int error);

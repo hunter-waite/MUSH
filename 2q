@@ -36,7 +36,6 @@ int get_stages(char *line, stage *stages){
  * max LINESIZE characters
  * if the last character is a newline changes it to a null */
 void get_line(char *line,int size){
-    memset(line,0, LINESIZE);
     printf("line: "); /* the prompt */
     if(!fgets(line,size,stdin)){
         perror("getline");
@@ -91,32 +90,32 @@ void parse_stages(stage *s, int index){
          *  parses for redirection and such */
         new = strtok(s[i].input," ");
         strcpy(command,new);
+        printf("%s\n",new);
         while(new != NULL){
-            printf("New: %s\n",new); 
             old = new;
             new = strtok(NULL," ");
-            if(old[0] == '<'){  /* input redirection */
-                if(new){    /* correct redirection */
+
+            if(old[0] == '<'){ /* input redirection */
+                if(new){ /* if there is a token after the redirect */
                     strncpy(s[i].in,new,LINESIZE);
                     if(++incount >= 2)
                         on_error(command,4);
-                }
-                else {  /* incorrect redirection */
+                } 
+                else { /* no token = error */
                     on_error(command,4);
                 }
-            }
-            else if(old[0] == '>'){  /* output redirect */
-                if(new){    /* correct redirect */
+            } 
+            else if(new && new[0] == '>'){ /* output redirection */
+                if(new){ /* if there is a token after the redirect */
                     strncpy(s[i].out,new,LINESIZE);
                     if(++outcount >= 2)
                         on_error(command,5);
-                }
-                else{   /* incorrect redirect */
+                } 
+                else { /* no token = error */
                     on_error(command,5);
                 }
             }
         }
-        printf("Argc: %d\n",s[i].argcount);
     }
 }
 
@@ -155,6 +154,35 @@ void on_error(char *cmd, unsigned int error){
     exit(3);
 }
 
+/*
+void parse_stages(stage *s, int index){
+    int i, incount, outcount, words;
+    char copy[LINESIZE];
+    char **breakdown[LINESIZE];
+    for(i=0; i < index; i++){
+        memset(copy, 0, LINESIZE);
+        strcpy(copy, s[i].input);
+
+        if(!check_whitespace(s[i].input)){
+            fprintf(stderr, "invalid null command\n");
+            exit(4);
+        }
+        seperate the input into parts to work with
+        words = word_count(s[i].input);
+        *breakdown = calloc(words, sizeof(char));
+        
+        
+
+        if(i==0 && (count - 1) != 0){
+        
+        }
+        else if(i == (count - 1)){
+
+        }
+
+    }
+}
+*/
 int word_count(char *s){
     int i, count;
     count = 0;
