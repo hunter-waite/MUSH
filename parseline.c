@@ -6,9 +6,6 @@ int main(int argc, char *argv[]){
     stage stages[NUMCMD];
     get_line(line,LINESIZE);
     count = get_stages(line,stages);
-    for(i=0; i < count; i++){
-        parse_stages(stages + i);
-    }
     return 0;
 }
 
@@ -88,10 +85,41 @@ int check_whitespace(char *s){
     return 0;
 }
 
-void parse_stages(stage *s){
-    if(!check_whitespace(s->input)){
-        fprintf(stderr, "invalid null command\n");
-        exit(4);
-    }
+void parse_stages(stage *s, int index){
+    int i, incount, outcount, words;
+    char copy[LINESIZE];
+    char **breakdown[LINESIZE];
+    for(i=0; i < index; i++){
+        memset(copy, 0, LINESIZE);
+        strcpy(copy, s[i].input);
 
+        if(!check_whitespace(s[i].input)){
+            fprintf(stderr, "invalid null command\n");
+            exit(4);
+        }
+        /*seperate the input into parts to work with*/
+        words = word_count(s[i].input);
+        *breakdown = calloc(words, sizeof(char));
+        
+        
+/*
+        if(i==0 && (count - 1) != 0){
+        
+        }
+        else if(i == (count - 1)){
+
+        }
+*/
+    }
+}
+
+int word_count(char *s){
+    int i, count;
+    count = 0;
+    for(i=0;s[i] != '\0';i++){
+        if(s[i] == ' ' && s[i+1] != ' '){
+            count++;
+        }
+    }
+    return count;
 }
