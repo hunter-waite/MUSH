@@ -93,15 +93,15 @@ void parse_stages(stage *s, int index){
         new = strtok(s[i].input," ");
         strcpy(command,new);
         while(new != NULL){
-            printf("New: %s\n",new); 
             old = new;
             new = strtok(NULL," ");
-
             if(old[0] == '<'){  /* input redirection */
                 if(new){    /* correct redirection */
                     strncpy(s[i].in,new,LINESIZE);
-                    if(++incount >= 2)
+                    if(++incount >= 2 || !strcmp(new,">"))
                         on_error(command,4);
+                    if(incount && i != 0) /* ambigous input case */
+                        on_error(command,6);
                 }
                 else {  /* incorrect redirection */
                     on_error(command,4);
@@ -110,15 +110,16 @@ void parse_stages(stage *s, int index){
             else if(old[0] == '>'){  /* output redirect */
                 if(new){    /* correct redirect */
                     strncpy(s[i].out,new,LINESIZE);
-                    if(++outcount >= 2)
+                    if(++outcount >= 2 || !strcmp(new,"<"))
                         on_error(command,5);
+                    if(outcount && i != (index-1)) /* ambiguous output */
+                        on_error(command,7);
                 }
                 else{   /* incorrect redirect */
                     on_error(command,5);
                 }
             }
         }
-
         printf("Argc: %d\n",s[i].argcount);
     }
 }
