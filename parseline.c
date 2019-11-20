@@ -80,7 +80,7 @@ int check_whitespace(char *s){
 /* parses the stages to check for errors and to fill their respective
  * stage struct */
 void parse_stages(stage *s, int index){
-    int i;
+    int i, redirect;
     int incount = 0;
     int outcount = 0;
     char *old, *new, command[LINESIZE];
@@ -106,6 +106,7 @@ void parse_stages(stage *s, int index){
                 else {  /* incorrect redirection */
                     on_error(command,4);
                 }
+                redirect = 1;
             }
             else if(old[0] == '>'){  /* output redirect */
                 if(new){    /* correct redirect */
@@ -118,6 +119,17 @@ void parse_stages(stage *s, int index){
                 else{   /* incorrect redirect */
                     on_error(command,5);
                 }
+                redirect = 1;
+            }
+            else if(strcmp(old, ">") && strcmp(old, "<")){
+                if(redirect == 0){
+                    printf("ARG: %s\n", old);
+                    s[i].argcount++;
+                }
+                else{
+                    redirect = 0;
+                }
+               
             }
         }
         printf("Argc: %d\n",s[i].argcount);
