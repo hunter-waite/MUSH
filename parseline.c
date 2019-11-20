@@ -118,14 +118,16 @@ void parse_stages(stage *s, int index){
     int i, redirect;
     int incount = 0;
     int outcount = 0;
-    char *old, *new, command[LINESIZE];
+    char *old, *new, command[LINESIZE], copy[LINESIZE];
     for(i=0;i<index; i++){  /* loops through all the stages */
         if(!check_whitespace(s[i].input))   /* if a stage is empty */
             on_error("",3);
         s[i].argcount = 0;
+        memset(copy, 0, LINESIZE);
+        strncpy(copy, s[i].input, LINESIZE);
         /* loops through all the "arguments" in the stage
          *  parses for redirection and such */
-        new = strtok(s[i].input," ");
+        new = strtok(copy," ");
         strcpy(command,new);
         while(new != NULL){
             old = new;
