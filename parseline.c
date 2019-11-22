@@ -5,7 +5,7 @@
  *  argument variables
  *  ambiguous input and output */
 
-int main(int argc, char *argv[]){
+int main(){
     int i;
     int count = 0;
     char line[LINESIZE];
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     get_line(line,LINESIZE);
     count = get_stages(line,stages);
     parse_stages(stages,count);
-    for(i=0; i < count; i++){
+    for(i=0; i < count; i++){ /*loop through and print each stage*/
         print_stage(stages[i], count);
     }
     return 0;
@@ -64,7 +64,7 @@ void print_stage(const struct stage s, int max){
     printf("Stage %d: \"%s\"\n", s.snum, s.input);
     printf("--------\n");
 
-    printf("%12s", "input: \0"); /*have to add actual input*/
+    printf("%12s", "input: \0"); /*decide actual input*/
     if(s.in[0]){
         strcpy(inmsg, s.in);
         printf("%s\n", inmsg);
@@ -78,7 +78,7 @@ void print_stage(const struct stage s, int max){
         strcpy(inmsg, "original stdin\0");
         printf("%s\n", inmsg);
     }
-    printf("%12s", "output: \0"); /*add actual output*/
+    printf("%12s", "output: \0"); /*decide  actual output*/
     if(s.out[0]){
         strcpy(outmsg, s.out);
         printf("%s\n", outmsg);
@@ -103,7 +103,7 @@ void print_stage(const struct stage s, int max){
  
 }
 
-int check_whitespace(char *s){
+int check_whitespace(char *s){/*checks if argument is just blank/Nothing*/
     int i;
     for(i = 0; i < (int)strlen(s); i++){
         if(!isspace(s[i]))
@@ -161,9 +161,8 @@ void parse_stages(stage *s, int index){
                 redirect = 1;
             }
             else if(strcmp(old, ">") && strcmp(old, "<")){
-                if(redirect == 0){
+                if(redirect == 0){/*redirect is a flag set if there is < or >*/
                     strncpy(s[i].argv[s[i].argcount], old, LINESIZE);
-                    /*printf("ARG: %s\n", s[i].argv[s[i].argcount]);*/
                     s[i].argcount++;
                 }
                 else{
