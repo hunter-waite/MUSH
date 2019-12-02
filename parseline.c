@@ -5,20 +5,6 @@
  *  argument variables
  *  ambiguous input and output */
 
-int main(){
-    int i;
-    int count = 0;
-    char line[LINESIZE];
-    stage stages[NUMCMD];
-    get_line(line,LINESIZE);
-    count = get_stages(line,stages);
-    parse_stages(stages,count);
-    for(i=0; i < count; i++){ /*loop through and print each stage*/
-        print_stage(stages[i], count);
-    }
-    return 0;
-}
-
 int get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
     int count = 0;
@@ -40,7 +26,7 @@ int get_stages(char *line, stage *stages){
  * if the last character is a newline changes it to a null */
 void get_line(char *line,int size){
     memset(line,0, LINESIZE);
-    printf("line: "); /* the prompt */
+    printf("8-P "); /* the prompt */
     if(!fgets(line,size,stdin)){
         perror("getline");
         exit(EXIT_FAILURE);
