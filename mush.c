@@ -30,12 +30,11 @@ int main(int argc, char *argv[]){
 
 void launch_pipe(int count,stage *stages){
     /*create pipes then fork children to have copies of pipe list*/
-    int i,j, check,index, rfd, wfd;
+    int i,j, check,rfd, wfd;
     int max_pipes = (count-1);
     int fd[18];
     int ind = 0;
-    pid_t cpids[count];
-    pid_t pid;
+    pid_t cpids[10];
     for(i=0;i<max_pipes;i++){
         ind = i*2;
         if((check = pipe(fd+ind)) == -1){
@@ -47,7 +46,7 @@ void launch_pipe(int count,stage *stages){
 
     /*from here we need to fork and execute*/
     for(j=0;j<count;j++){
-        if(cpids[j] = fork()){ /* this is the parent */
+        if((cpids[j] = fork())){ /* this is the parent */
             if(cpids[j] == -1){
                 perror("fork");
                 break;
@@ -70,7 +69,7 @@ void launch_pipe(int count,stage *stages){
                 }
                 if(count > 1){
                     dup2(fd[pipe_write], STDOUT_FILENO);
-                    close(fd[pipe_write]); /*close all file descriptors??*/
+                    close_fd(fd); /*close all file descriptors??*/
                 }
             }
             if(j == count-1){
@@ -84,11 +83,11 @@ void launch_pipe(int count,stage *stages){
                     close(wfd);
                 }
                 if(count > 1){
-                    dup2(fd[pipe_read], STDIN_FILEOUT);
-                    close(fd[pipe_read]);
+                    dup2(fd[pipe_read], STDIN_FILENO);
+                    close_fd(fd);
                 }
             }
-            if(j !== 0 && j != count-1){
+            if(j != 0 && j != count-1){
                 dup2(fd[pipe_read], STDIN_FILENO);
                 dup2(fd[pipe_write], STDOUT_FILENO);
                 /*close all?*/
@@ -96,10 +95,11 @@ void launch_pipe(int count,stage *stages){
             }
 
             /*once the pipe has been set up then execute*/
-            execvp(stages[j].argv[0], stages[j].argv+1);
+            execvp(stages[j].argv[0],(char * const *)stages[j].argv);
             printf("please never run this code");
         }
     }
+    
 }
 
 void close_fd(int fd[]){
