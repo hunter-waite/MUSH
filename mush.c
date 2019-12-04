@@ -1,5 +1,4 @@
 #include "mush.h"
-#include "parseline.h"
 
 int main(int argc, char *argv[]){
     int i, check;
@@ -23,36 +22,89 @@ int main(int argc, char *argv[]){
                 continue;
             }
         }
-        launch_pipe(count);
+        launch_pipe(count,stages);
         memset(stages,0,count * sizeof(stage));
     }
     return 0;
 }
 
-
-void launch_pipe(int count){
+void launch_pipe(int count,stage *stages){
     /*create pipes then fork children to have copies of pipe list*/
-    int i,j, check,index;
+    int i,j, check,index, rfd, wfd;
     int max_pipes = (count-1);
     int fd[18];
     int ind = 0;
+    pid_t cpids[count];
     pid_t pid;
     for(i=0;i<max_pipes;i++){
-        if(i!=0){
-            ind += 2;
-        }
-        else{
-            ind = 0;
-        }
+        ind = i*2;
         if((check = pipe(fd+ind)) == -1){
             perror("pipe");
             continue;
         }
     }
 
+
     /*from here we need to fork and execute*/
     for(j=0;j<count;j++){
-        
+        if(cpids[j] = fork()){ /* this is the parent */
+            if(cpids[j] == -1){
+                perror("fork");
+                break;
+            }
 
+        } else { /* this is the child */
+            int pipe_write = (j*2) + 1;
+            int pipe_read = (j*2) - 2;
+            /*unblock SIGINT*/
+
+            /*set up pipes*/
+            if(j == 0){
+                if(stages[j].in != NULL){
+                    if((rfd = open(stages[j].in, O_RDONLY)) == -1){
+                        perror("open");
+                        break;
+                    }
+                    dup2(rfd, STDIN_FILENO);
+                    close(rfd);
+                }
+                if(count > 1){
+                    dup2(fd[pipe_write], STDOUT_FILENO);
+                    close(fd[pipe_write]); /*close all file descriptors??*/
+                }
+            }
+            if(j == count-1){
+                if(stages[j].out != NULL){
+                    if((wfd = open(stages[j].out,
+                        O_WRONLY | O_CREAT | O_TRUNC))){
+                        perror("open");
+                        break;
+                    }
+                    dup2(wfd, STDOUT_FILENO);
+                    close(wfd);
+                }
+                if(count > 1){
+                    dup2(fd[pipe_read], STDIN_FILEOUT);
+                    close(fd[pipe_read]);
+                }
+            }
+            if(j !== 0 && j != count-1){
+                dup2(fd[pipe_read], STDIN_FILENO);
+                dup2(fd[pipe_write], STDOUT_FILENO);
+                /*close all?*/
+                close_fd(fd);
+            }
+
+            /*once the pipe has been set up then execute*/
+            execvp(stages[j].argv[0], stages[j].argv+1);
+            printf("please never run this code");
+        }
+    }
+}
+
+void close_fd(int fd[]){
+    int i;
+    for(i=0;i<18;i++){
+        close(fd[i]);
     }
 }

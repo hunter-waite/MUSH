@@ -32,7 +32,6 @@ void get_line(char *line,int size){
     if(!fgets(line,size,stdin)){
         printf("\n");
         if(errno != EINTR){
-            printf("here\n");
             exit(EXIT_FAILURE);
         }
     }
