@@ -195,5 +195,5 @@ void on_error(char *cmd, unsigned int error){
     } else {
         fprintf(stderr,"undefined error: exiting\n");
     }
-    exit(3);
+    /*got rid of exit but need a way to tell if error or not*/
 }

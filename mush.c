@@ -23,7 +23,31 @@ int main(int argc, char *argv[]){
                 continue;
             }
         }
+        launch_pipe(count);
         memset(stages,0,count * sizeof(stage));
     }
     return 0;
+}
+
+
+void launch_pipe(int count){
+    /*create pipes then forl children to have copies of pipe list*/
+    int i, check;
+    int max_pipes = (count-1);
+    int fd[18];
+    int ind = 0;
+    for(i=0;i<max_pipes;i++){
+        if(i!=0){
+            ind += 2;
+        }
+        else{
+            ind = 0;
+        }
+        if((check = pipe(fd+ind)) == -1){
+            perror("pipe");
+            continue;
+        }
+    }
+    /*from here we need to fork and execute*/
+     
 }
