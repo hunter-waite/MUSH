@@ -6,10 +6,10 @@ int main(int argc, char *argv[]){
     int count = 0;
     char line[LINESIZE];
     stage stages[NUMCMD];
-    sigset_t mask;
+   /* sigset_t mask;
     sigemptyset(&mask);
     sigaddset(&mask,SIGINT);
-    sigprocmask(SIG_BLOCK,&mask,NULL);
+    sigprocmask(SIG_BLOCK,&mask,NULL); */
     while(1){
         get_line(line,LINESIZE);
         if(!strcmp(line,"exit")){
@@ -31,11 +31,12 @@ int main(int argc, char *argv[]){
 
 
 void launch_pipe(int count){
-    /*create pipes then forl children to have copies of pipe list*/
-    int i, check;
+    /*create pipes then fork children to have copies of pipe list*/
+    int i,j, check,index;
     int max_pipes = (count-1);
     int fd[18];
     int ind = 0;
+    pid_t pid;
     for(i=0;i<max_pipes;i++){
         if(i!=0){
             ind += 2;
@@ -48,6 +49,10 @@ void launch_pipe(int count){
             continue;
         }
     }
+
     /*from here we need to fork and execute*/
-     
+    for(j=0;j<count;j++){
+        
+
+    }
 }

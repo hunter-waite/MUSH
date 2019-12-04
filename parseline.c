@@ -26,10 +26,15 @@ int get_stages(char *line, stage *stages){
  * if the last character is a newline changes it to a null */
 void get_line(char *line,int size){
     memset(line,0, LINESIZE);
-    printf("8-P "); /* the prompt */
+    if(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)){
+        printf("8-P "); /* the prompt */
+    }
     if(!fgets(line,size,stdin)){
-        perror("getline");
-        exit(EXIT_FAILURE);
+        printf("\n");
+        if(errno != EINTR){
+            printf("here\n");
+            exit(EXIT_FAILURE);
+        }
     }
     if(strchr(line, '\n') == NULL) /* if the line is too long */
         on_error("",0);
