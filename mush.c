@@ -5,10 +5,7 @@ int main(int argc, char *argv[]){
     int count = 0;
     char line[LINESIZE];
     stage stages[NUMCMD];
-   /* sigset_t mask;
-    sigemptyset(&mask);
-    sigaddset(&mask,SIGINT);
-    sigprocmask(SIG_BLOCK,&mask,NULL); */
+    sigset_t mask;
     while(1){
         get_line(line,LINESIZE);
         if(!strcmp(line,"exit")){
@@ -22,13 +19,17 @@ int main(int argc, char *argv[]){
                 continue;
             }
         }
-        launch_pipe(count,stages);
+        
+        sigemptyset(&mask);
+        sigaddset(&mask,SIGINT);
+        sigprocmask(SIG_BLOCK,&mask,NULL);
+        launch_pipe(count,stages, mask);
         memset(stages,0,count * sizeof(stage));
     }
     return 0;
 }
 
-void launch_pipe(int count,stage *stages){
+void launch_pipe(int count,stage *stages, sigset_t mask){
     /*create pipes then fork children to have copies of pipe list*/
     int i,j, check,rfd, wfd;
     int max_pipes = (count-1);
@@ -93,12 +94,18 @@ void launch_pipe(int count,stage *stages){
                 /*close all?*/
                 close_fd(fd);
             }
-
+            /*unblock SIGINT*/
+            sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
             execvp(stages[j].argv[0],(char * const *)stages[j].argv);
             printf("please never run this code");
         }
     }
+    /*close all file descriptors in parent*/
+    close_fd(fd);
+
+    /*wait for children to finish*/
+    
     
 }
 

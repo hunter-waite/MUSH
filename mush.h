@@ -6,5 +6,5 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-void launch_pipe(int count,stage *stages);
+void launch_pipe(int count,stage *stages, sigset_t mask);
 void close_fd(int fd[]);
