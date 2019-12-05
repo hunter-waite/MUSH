@@ -6,21 +6,22 @@ int main(int argc, char *argv[]){
     char line[LINESIZE];
     stage stages[NUMCMD];
     sigset_t mask;
-    while(1){
+   /* while(1) */{
+        printf("here\n");
         get_line(line,LINESIZE);
         if(!strcmp(line,"exit")){
             return 0;
         }
         if(!strcmp(line,"clear")){
             printf("\e[1;1H\e[2J");
-            continue;
+           /*  continue; */
         }
         count = get_stages(line,stages);
         parse_stages(stages,count);
         if(!strcmp(stages[0].argv[0], "cd")){
             if((check = chdir(stages[0].argv[1])) == -1){
                 perror(stages[0].argv[1]);
-                continue;
+               /* continue;*/
             }
         }
         
@@ -62,11 +63,16 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             int pipe_write = (j*2) + 1;
             int pipe_read = (j*2) - 2;
 
+    
+            printf("stages in: %s\n",stages[j].out);
+            printf("this is j: %d\n",j);
+
             /*set up pipes*/
             if(j == 0){
-                if(stages[j].in != NULL){
+                if(stages[j].in[0] != '\0'){
                     if((rfd = open(stages[j].in, O_RDONLY)) == -1){
-                        perror("open");
+                        perror("open fd");
+                        printf("PID: %d", getpid());
                         break;
                     }
                     dup2(rfd, STDIN_FILENO);
@@ -78,10 +84,11 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 }
             }
             if(j == count-1){
-                if(stages[j].out != NULL){
+                if(stages[j].out[0] != '\0'){
                     if((wfd = open(stages[j].out,
-                        O_WRONLY | O_CREAT | O_TRUNC))){
+                                    O_WRONLY | O_CREAT | O_TRUNC))){
                         perror("open");
+                        printf("PID: %d", getpid());
                         break;
                     }
                     dup2(wfd, STDOUT_FILENO);
@@ -93,14 +100,15 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 }
             }
             if(j != 0 && j != count-1){
-                dup2(fd[pipe_read], STDIN_FILENO);
-                dup2(fd[pipe_write], STDOUT_FILENO);
+                dup2(fd[pipe_read], STDOUT_FILENO);
+                dup2(fd[pipe_write], STDIN_FILENO);
                 /*close all?*/
                 close_fd(fd);
             }
             /*unblock SIGINT*/
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
+            printf("stages argument: %s\n",stages[j].argv[0]);
             execvp(stages[j].argv[0],(char * const *)stages[j].argv);
             perror("exec");
             exit(3);
@@ -112,7 +120,6 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
     /*wait for children to finish*/
     for(j=0;j<count;j++){
         /*flush stdout because buffered write*/
-        fflush(stdout);
         waitpid(cpids[j], &status, 0);
        /*need to check status and see how wait exited*/ 
     }
