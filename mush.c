@@ -11,6 +11,10 @@ int main(int argc, char *argv[]){
         if(!strcmp(line,"exit")){
             return 0;
         }
+        if(!strcmp(line,"clear")){
+            printf("\e[1;1H\e[2J");
+            continue;
+        }
         count = get_stages(line,stages);
         parse_stages(stages,count);
         if(!strcmp(stages[0].argv[0], "cd")){
@@ -31,11 +35,12 @@ int main(int argc, char *argv[]){
 
 void launch_pipe(int count,stage *stages, sigset_t mask){
     /*create pipes then fork children to have copies of pipe list*/
-    int i,j, check,rfd, wfd;
+    int i, j, check,rfd, wfd, status;
     int max_pipes = (count-1);
     int fd[18];
     int ind = 0;
     pid_t cpids[10];
+    memset(cpids, 0, 10);
     for(i=0;i<max_pipes;i++){
         ind = i*2;
         if((check = pipe(fd+ind)) == -1){
@@ -56,7 +61,6 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
         } else { /* this is the child */
             int pipe_write = (j*2) + 1;
             int pipe_read = (j*2) - 2;
-            /*unblock SIGINT*/
 
             /*set up pipes*/
             if(j == 0){
@@ -98,14 +102,20 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
             execvp(stages[j].argv[0],(char * const *)stages[j].argv);
-            printf("please never run this code");
+            perror("exec");
+            exit(3);
         }
     }
     /*close all file descriptors in parent*/
     close_fd(fd);
 
     /*wait for children to finish*/
-    
+    for(j=0;j<count;j++){
+        /*flush stdout because buffered write*/
+        fflush(stdout);
+        waitpid(cpids[j], &status, 0);
+       /*need to check status and see how wait exited*/ 
+    }
     
 }
 

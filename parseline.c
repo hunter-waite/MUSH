@@ -29,10 +29,15 @@ void get_line(char *line,int size){
     if(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)){
         printf("8-P "); /* the prompt */
     }
-    if(!fgets(line,size,stdin)){
+    if(fgets(line,size,stdin)==NULL){
         printf("\n");
-        if(errno != EINTR){
+        if(feof(stdin)){
+            printf("EOF\n");
+            printf("%d\n", errno);
             exit(EXIT_FAILURE);
+        }
+        else if(errno == EINTR){
+            printf("here\n");
         }
     }
     if(strchr(line, '\n') == NULL) /* if the line is too long */
