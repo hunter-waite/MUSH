@@ -62,7 +62,13 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
         } else { /* this is the child */
             int pipe_write = (j*2) + 1;
             int pipe_read = (j*2) - 2;
-
+            void* args[11];
+            int i;
+            memset(args, 0, 11);
+            printf("try");
+            for(i=0;i<10;i++){
+                strcpy(args[i], stages[j].argv[i]);
+            }
     
             printf("stages in: %s\n",stages[j].out);
             printf("this is j: %d\n",j);
@@ -109,7 +115,7 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
             printf("stages argument: %s\n",stages[j].argv[0]);
-            execvp(stages[j].argv[0],(char * const *)stages[j].argv);
+            execvp(stages[j].argv[0],(char * const *)args);
             perror("exec");
             exit(3);
         }
