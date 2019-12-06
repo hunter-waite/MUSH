@@ -1,4 +1,5 @@
 #include <string.h>
+#include <signal.h>
 #include <strings.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -22,9 +23,9 @@ typedef struct stage {
 } stage;
 
 int get_stages(char *line, stage *stages);
-void get_line(char *line,int size);
+int get_line(char *line,int size,FILE *stream);
 void print_stage(const struct stage s, int max);
 void populate_stage(stage st, char *token, int stnum);
 int check_whitespace(char *s);
-void parse_stages(stage *s, int index);
+int parse_stages(stage *s, int index);
 void on_error(char *cmd, unsigned int error);

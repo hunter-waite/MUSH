@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <signal.h>
 #include <unistd.h>
 #include "parseline.h"
 #include <sys/types.h> 

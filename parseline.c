@@ -5,14 +5,22 @@
  *  argument variables
  *  ambiguous input and output */
 
+void handler(int signum){
+    printf("\n");
+}
+
 int get_stages(char *line, stage *stages){
     char *token = strtok(line,"|");
     int count = 0;
-    if(!token) /* null line case */
+    if(!token){ /* null line case */
         on_error("",3);
+        return -1;
+    }
     while(token != NULL){
-        if(count >= NUMCMD)
+        if(count >= NUMCMD){
             on_error("",1);
+            return -1;
+        }
         stages[count].snum = count;
         strcpy(stages[count].input, token);
         token = strtok(NULL,"|");
@@ -24,31 +32,45 @@ int get_stages(char *line, stage *stages){
 /* gets the line from the prompt in the parseline 
  * max LINESIZE characters
  * if the last character is a newline changes it to a null */
-void get_line(char *line,int size){
+int get_line(char *line,int size, FILE *stream){
+    struct sigaction sa;
+    sa.sa_handler = handler;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    if(sigaction(SIGINT, &sa, NULL) < 0){
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
     memset(line,0, LINESIZE);
     if(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)){
         printf("8-P "); /* the prompt */
     }
-    if(fgets(line,size,stdin)==NULL){
-        printf("\n");
-        if(feof(stdin)){
-            printf("EOF\n");
-            printf("%d\n", errno);
+    if(fgets(line,size,stream)==NULL){
+        if(feof(stream)){
+            printf("\n");
             exit(EXIT_FAILURE);
         }
         if(errno != EINTR){
-            printf("here\n");
+            printf("\n");
             exit(EXIT_FAILURE);
+        } else {
+            return -1;
         }
+
     }
-    if(strchr(line, '\n') == NULL) /* if the line is too long */
+    if(strchr(line, '\n') == NULL){ /* if the line is too long */
         on_error("",0);
+        return -1;
+    }
     else if(line[size-1] == '\n')    /* checks for full line case */
         line[size-1] = '\0';
     else if(line[strlen(line)-1])   /* last character to null if newline */
         line[strlen(line)-1] = '\0';
-    if(line[strlen(line)-1] == '|')
+    if(line[strlen(line)-1] == '|'){
         on_error("",3);
+        return -1;
+    }
+    return 0;
 }
 
 void print_stage(const struct stage s, int max){
@@ -110,14 +132,16 @@ int check_whitespace(char *s){/*checks if argument is just blank/Nothing*/
 
 /* parses the stages to check for errors and to fill their respective
  * stage struct */
-void parse_stages(stage *s, int index){
+int parse_stages(stage *s, int index){
     int i, redirect = 0;
     int incount = 0;
     int outcount = 0;
     char *old, *new, command[LINESIZE], copy[LINESIZE];
     for(i=0;i<index; i++){  /* loops through all the stages */
-        if(!check_whitespace(s[i].input))   /* if a stage is empty */
+        if(!check_whitespace(s[i].input)){   /* if a stage is empty */
             on_error("",3);
+            return -1;
+        }
         s[i].argcount = 0;
         memset(copy, 0, LINESIZE);
         strncpy(copy, s[i].input, LINESIZE);
@@ -125,34 +149,46 @@ void parse_stages(stage *s, int index){
          *  parses for redirection and such */
         new = strtok(copy," ");
         strcpy(command,new);
-        if(!strcmp(command,"<") || !strcmp(command,">")) /* bad redir up top */
+        if(!strcmp(command,"<") || !strcmp(command,">")){ /* bad redir up top */
             on_error("",3);
+            return -1;
+        }
         while(new != NULL){
             old = new;
             new = strtok(NULL," ");
             if(old[0] == '<'){  /* input redirection */
                 if(new){    /* correct redirection */
                     strncpy(s[i].in,new,LINESIZE);
-                    if(++incount >= 2 || !strcmp(new,">"))
+                    if(++incount >= 2 || !strcmp(new,">")){
                         on_error(command,4);
-                    if(incount && i != 0) /* ambigous input case */
+                        return -1;
+                    }
+                    if(incount && i != 0){ /* ambigous input case */
                         on_error(command,6);
+                        return -1;
+                    }
                 }
                 else {  /* incorrect redirection */
                     on_error(command,4);
+                    return -1;
                 }
                 redirect = 1;
             }
             else if(old[0] == '>'){  /* output redirect */
                 if(new){    /* correct redirect */
                     strncpy(s[i].out,new,LINESIZE);
-                    if(++outcount >= 2 || !strcmp(new,"<"))
+                    if(++outcount >= 2 || !strcmp(new,"<")){
                         on_error(command,5);
-                    if(outcount && i != (index-1)) /* ambiguous output */
+                        return -1;
+                    }
+                    if(outcount && i != (index-1)){ /* ambiguous output */
                         on_error(command,7);
+                        return -1;
+                    }
                 }
                 else{   /* incorrect redirect */
                     on_error(command,5);
+                    return -1;
                 }
                 redirect = 1;
             }
@@ -166,11 +202,13 @@ void parse_stages(stage *s, int index){
                 }
                 if(s[i].argcount >= NUMARGS){
                     on_error(command,2);
+                    return -1;
                 }
                
             }
         }
     }
+    return 0;
 }
 
 /* prints the correct error message to stderr and exits 

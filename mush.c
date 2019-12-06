@@ -1,34 +1,46 @@
 #include "mush.h"
 
 int main(int argc, char *argv[]){
-    int i, check;
+    int check;
     int count = 0;
     char line[LINESIZE];
     stage stages[NUMCMD];
-
     sigset_t mask;
+
+    FILE *stream = stdin;
+
+    if(argc > 1){
+        if((stream = fopen(argv[1], "r+")) == NULL){
+            perror(argv[1]);
+            exit(EXIT_FAILURE);
+        }
+    }
+
     while(1) {
-        get_line(line,LINESIZE);
+        if(get_line(line,LINESIZE,stream) == -1){
+            continue;
+        }
         if(!strcmp(line,"exit")){
             return 0;
         }
-        if(!strcmp(line,"clear")){
-            printf("\e[1;1H\e[2J");
-           continue;
-        }
+        
         count = get_stages(line,stages);
-        parse_stages(stages,count);
+        if(count == -1)
+            continue;
+        if( parse_stages(stages,count) == -1){
+            continue;
+        }
         if(!strcmp(stages[0].argv[0], "cd")){
             if((check = chdir(stages[0].argv[1])) == -1){
                 perror(stages[0].argv[1]);
                continue;
             }
         }
-        
         sigemptyset(&mask);
         sigaddset(&mask,SIGINT);
         sigprocmask(SIG_BLOCK,&mask,NULL);
         launch_pipe(count,stages, mask);
+        sigprocmask(SIG_UNBLOCK,&mask, NULL);
         memset(stages,0,count * sizeof(stage));
     }
     return 0;
@@ -73,7 +85,7 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 l++; 
             }
 
-            args[l+1] = NULL;
+            args[l] = NULL;
 
             for(k=0;k<l;k++){
                 strcpy(args[k], stages[j].argv[k]);
