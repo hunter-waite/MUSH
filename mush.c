@@ -64,6 +64,7 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             int pipe_read = (j*2) - 2;
             void* args[11];
             int i;
+            printf("try");
             memset(args, 0, 11);
             printf("try");
             for(i=0;i<10;i++){
@@ -114,18 +115,19 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             /*unblock SIGINT*/
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
-            printf("stages argument: %s\n",stages[j].argv[0]);
+            printf("stages argument: %s PID: %d\n",stages[j].argv[0],getpid());
             execvp(stages[j].argv[0],(char * const *)args);
             perror("exec");
             exit(3);
         }
     }
     /*close all file descriptors in parent*/
-    close_fd(fd);
+   /* close_fd(fd);*/
 
     /*wait for children to finish*/
     for(j=0;j<count;j++){
         /*flush stdout because buffered write*/
+        printf("PID of the wait %d\n", cpids[j]);
         waitpid(cpids[j], &status, 0);
        /*need to check status and see how wait exited*/ 
     }
