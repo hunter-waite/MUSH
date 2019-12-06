@@ -98,7 +98,8 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             if(j == count-1){
                 if(stages[j].out[0] != '\0'){
                     if((wfd = open(stages[j].out,
-                                    O_WRONLY | O_CREAT | O_TRUNC))){
+                                    O_WRONLY | O_CREAT | O_TRUNC,
+                                    0777)) == -1){
                         perror("open");
                         printf("PID: %d", getpid());
                         break;
