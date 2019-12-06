@@ -8,7 +8,6 @@ int main(int argc, char *argv[]){
 
     sigset_t mask;
     while(1) {
-        printf("here\n");
         get_line(line,LINESIZE);
         if(!strcmp(line,"exit")){
             return 0;
@@ -69,20 +68,17 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             args = malloc(11);
             
             l=0;
-            while(stages[j].argv[l][0] != '\0'){
-                *args = malloc(512);
+            while(stages[j].argv[l][0] != '\0' &&  l < 10){
+                args[l] = malloc(512);
                 l++; 
             }
 
-            *(args+l) = NULL;
+            args[l+1] = NULL;
 
             for(k=0;k<l;k++){
                 strcpy(args[k], stages[j].argv[k]);
             }
     
-            printf("stages in: %s\n",stages[j].out);
-            printf("this is j: %d\n",j);
-
             /*set up pipes*/
             if(j == 0){
                 if(stages[j].in[0] != '\0'){
@@ -107,6 +103,7 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                         printf("PID: %d", getpid());
                         break;
                     }
+                    printf("here");
                     dup2(wfd, STDOUT_FILENO);
                     close(wfd);
                 }
@@ -122,9 +119,9 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 close_fd(fd, max_pipes);
             }
             /*unblock SIGINT*/
+            fflush(stdout);
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
-            printf("stages argument: %s PID: %d\n",stages[j].argv[0],getpid());
             execvp(stages[j].argv[0],(char * const *)args);
             perror("exec");
             exit(3);
@@ -136,7 +133,6 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
     /*wait for children to finish*/
     for(j=0;j<count;j++){
         /*flush stdout because buffered write*/
-        printf("PID of the wait %d\n", cpids[j]);
         waitpid(cpids[j], &status, 0);
        /*need to check status and see how wait exited*/ 
     }
