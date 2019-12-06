@@ -42,7 +42,7 @@ int get_line(char *line,int size, FILE *stream){
         exit(EXIT_FAILURE);
     }
     memset(line,0, LINESIZE);
-    if(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)){
+    if(isatty(fileno(stream)) && isatty(STDOUT_FILENO)){
         printf("8-P "); /* the prompt */
     }
     if(fgets(line,size,stream)==NULL){

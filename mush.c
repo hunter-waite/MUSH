@@ -10,7 +10,7 @@ int main(int argc, char *argv[]){
     FILE *stream = stdin;
 
     if(argc > 1){
-        if((stream = fopen(argv[1], "r+")) == NULL){
+        if((stream = fopen(argv[1], "r")) == NULL){
             perror(argv[1]);
             exit(EXIT_FAILURE);
         }
