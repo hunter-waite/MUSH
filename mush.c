@@ -76,15 +76,15 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             int pipe_read = (j*2) - 2;
             char **args;
             int k, l;
-
-            args = malloc(11);
+    
+            args = malloc(sizeof(char*) * 10);
             
             l=0;
             while(stages[j].argv[l][0] != '\0' &&  l < 10){
                 args[l] = malloc(512);
                 l++; 
             }
-
+            
             args[l] = NULL;
 
             for(k=0;k<l;k++){
@@ -133,13 +133,13 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             fflush(stdout);
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
-            /*block cd?*/
             if(strcmp(stages[j].argv[0], "cd")){
                 execvp(stages[j].argv[0],(char * const *)args);
                 perror(stages[j].argv[0]);
                 exit(3);
             }
             else{
+                free_args(args, l);
                 exit(EXIT_FAILURE);
             }
 
@@ -161,5 +161,12 @@ void close_fd(int fd[], int num_pipes){
     int i;
     for(i=0;i<(num_pipes * 2);i++){
         close(fd[i]);
+    }
+}
+
+void free_args(char **arguments, int length){
+    int i;
+    for(i=0;i<length;i++){
+        free(arguments + i);
     }
 }

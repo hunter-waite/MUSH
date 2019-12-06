@@ -58,6 +58,9 @@ int get_line(char *line,int size, FILE *stream){
         }
 
     }
+    if(line[0] == 0x4){
+        exit(EXIT_FAILURE);
+    }
     if(strchr(line, '\n') == NULL){ /* if the line is too long */
         on_error("",0);
         return -1;
