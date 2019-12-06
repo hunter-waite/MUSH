@@ -14,14 +14,14 @@ int main(int argc, char *argv[]){
         }
         if(!strcmp(line,"clear")){
             printf("\e[1;1H\e[2J");
-           /*  continue; */
+           continue;
         }
         count = get_stages(line,stages);
         parse_stages(stages,count);
         if(!strcmp(stages[0].argv[0], "cd")){
             if((check = chdir(stages[0].argv[1])) == -1){
                 perror(stages[0].argv[1]);
-               /* continue;*/
+               continue;
             }
         }
         
@@ -101,10 +101,8 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                                     O_WRONLY | O_CREAT | O_TRUNC,
                                     0777)) == -1){
                         perror("open");
-                        printf("PID: %d", getpid());
                         break;
                     }
-                    printf("here");
                     dup2(wfd, STDOUT_FILENO);
                     close(wfd);
                 }
@@ -114,8 +112,8 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 }
             }
             if(j != 0 && j != count-1){
-                dup2(fd[pipe_read], STDOUT_FILENO);
-                dup2(fd[pipe_write], STDIN_FILENO);
+                dup2(fd[pipe_read], STDIN_FILENO);
+                dup2(fd[pipe_write], STDOUT_FILENO);
                 /*close all?*/
                 close_fd(fd, max_pipes);
             }
@@ -123,9 +121,16 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
             fflush(stdout);
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
             /*once the pipe has been set up then execute*/
-            execvp(stages[j].argv[0],(char * const *)args);
-            perror("exec");
-            exit(3);
+            /*block cd?*/
+            if(strcmp(stages[j].argv[0], "cd")){
+                execvp(stages[j].argv[0],(char * const *)args);
+                perror(stages[j].argv[0]);
+                exit(3);
+            }
+            else{
+                exit(EXIT_FAILURE);
+            }
+
         }
     }
     /*close all file descriptors in parent*/

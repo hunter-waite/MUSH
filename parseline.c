@@ -36,8 +36,9 @@ void get_line(char *line,int size){
             printf("%d\n", errno);
             exit(EXIT_FAILURE);
         }
-        else if(errno == EINTR){
+        if(errno != EINTR){
             printf("here\n");
+            exit(EXIT_FAILURE);
         }
     }
     if(strchr(line, '\n') == NULL) /* if the line is too long */
