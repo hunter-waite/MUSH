@@ -5,6 +5,7 @@ int main(int argc, char *argv[]){
     int count = 0;
     char line[LINESIZE];
     stage stages[NUMCMD];
+
     sigset_t mask;
    /* while(1) */{
         printf("here\n");
