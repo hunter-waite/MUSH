@@ -88,7 +88,7 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 }
                 if(count > 1){
                     dup2(fd[pipe_write], STDOUT_FILENO);
-                    close_fd(fd); /*close all file descriptors??*/
+                    close_fd(fd, max_pipes); /*close all file descriptors??*/
                 }
             }
             if(j == count-1){
@@ -104,14 +104,14 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
                 }
                 if(count > 1){
                     dup2(fd[pipe_read], STDIN_FILENO);
-                    close_fd(fd);
+                    close_fd(fd, max_pipes);
                 }
             }
             if(j != 0 && j != count-1){
                 dup2(fd[pipe_read], STDOUT_FILENO);
                 dup2(fd[pipe_write], STDIN_FILENO);
                 /*close all?*/
-                close_fd(fd);
+                close_fd(fd, max_pipes);
             }
             /*unblock SIGINT*/
             sigprocmask(SIG_UNBLOCK,&mask,NULL);
@@ -123,7 +123,7 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
         }
     }
     /*close all file descriptors in parent*/
-   /* close_fd(fd);*/
+    close_fd(fd, max_pipes);
 
     /*wait for children to finish*/
     for(j=0;j<count;j++){
@@ -135,9 +135,9 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
     
 }
 
-void close_fd(int fd[]){
+void close_fd(int fd[], int num_pipes){
     int i;
-    for(i=0;i<18;i++){
+    for(i=0;i<(num_pipes * 2);i++){
         close(fd[i]);
     }
 }
