@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     stage stages[NUMCMD];
 
     sigset_t mask;
-   /* while(1) */{
+    while(1) {
         printf("here\n");
         get_line(line,LINESIZE);
         if(!strcmp(line,"exit")){
@@ -63,13 +63,21 @@ void launch_pipe(int count,stage *stages, sigset_t mask){
         } else { /* this is the child */
             int pipe_write = (j*2) + 1;
             int pipe_read = (j*2) - 2;
-            void* args[11];
-            int i;
-            printf("try");
-            memset(args, 0, 11);
-            printf("try");
-            for(i=0;i<10;i++){
-                strcpy(args[i], stages[j].argv[i]);
+            char **args;
+            int k, l;
+
+            args = malloc(11);
+            
+            l=0;
+            while(stages[j].argv[l][0] != '\0'){
+                *args = malloc(512);
+                l++; 
+            }
+
+            *(args+l) = NULL;
+
+            for(k=0;k<l;k++){
+                strcpy(args[k], stages[j].argv[k]);
             }
     
             printf("stages in: %s\n",stages[j].out);
